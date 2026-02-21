@@ -1,574 +1,1021 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Portfólio</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ChiaraGo - Rede Social</title>
+    
+    <!-- Supabase JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Tela de Login/Cadastro */
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .auth-container h1 {
+            color: #764ba2;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .auth-container p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .toggle-auth {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .toggle-auth span {
+            color: #764ba2;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Painel Principal (após login) */
+        .main-panel {
+            display: none;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar-header h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #764ba2;
+            margin-right: 15px;
+        }
+
+        .user-details h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-details p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .menu-item i {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        /* Conteúdo Principal */
+        .content {
+            margin-left: 280px;
+            padding: 30px;
+        }
+
+        .feed {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .post-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .post-info span {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .post-content {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .post-actions button {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .post-actions button:hover {
+            color: #764ba2;
+        }
+
+        /* Lista de Contatos */
+        .contacts-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .contacts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .contacts-header h3 {
+            color: #333;
+        }
+
+        .add-contact-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .contact-item:hover {
+            background: #f9f9f9;
+        }
+
+        .contact-avatar {
+            width: 45px;
+            height: 45px;
+            background: #764ba2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-info h4 {
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+
+        .contact-info p {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .contact-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            margin-left: 10px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            margin: 50px auto;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            font-size: 30px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Chat */
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+
+        .message.received {
+            margin-right: auto;
+        }
+
+        .message.sent {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message-content {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .message.sent .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <!-- Cabeçalho -->
-    <header style="background: #0c7075;">
-        <nav>
-            <div class="logo"> Meu Portifólio</div>
-            <ul class="nav-links">
-                <li><a href="tic.html">Jogos</a></li>
-                <li><a href="about.html">Sobre</a></li>
-                <li><a href="registe.html">Projetos</a></li>
-                <li><a href="#contact">Contato</a></li>
-            </ul>
-            <div class="burger">
-                <div class="line1"></div>
-                <div class="line2"></div>
-                <div class="line3"></div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Seção Hero -->
-    <section id="home" class="hero" style="background-image: img.jpg;">
-        <div class="hero-content">
-            <h1>#<span>Desenvolvidor web</span> Angelo Francisco Ch. Junior</h1>          
-            <p>L'education c'est notre passaport pour l'avenir apres demain appartient a ceux quise preparent aujourd'hui.</p>
-            <a href="#projects" class="btn">Ver Meus Trabalhos</a>
-        </div>
-    </section>
-
-       
-            </div>
-            <div class="about-text">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- parte de  Projetos -->
-    <section id="projects" class="projects">
-        <h2 class="section-title">Meus Projetos</h2>
-        <div class="projects-grid">
-            <!-- Projeto 1 -->
-            <div class="project-card">
-                <img src="teen.png" alt="Projeto 1">
-                <div class="project-info">
-                    <h3>Teen Life record</h3>
-                    <p>Teen Life record é um studio de gravaçao e canal de musicas de alta qualidade com categorias incriveis.</p>
-                    <div class="project-links">
-                        <a href="#"><i class="fas fa-external-link-alt"></i>Click para ver</a>
-                        <a href="https://youtube.com/@teenlife999?si=tIvUxDFPhAkRwImM"><i class="fab fa-youtube"></i> Youtube</a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Projeto 2 -->
-            <div class="project-card">
-                <img src="img.jpg" alt="Projeto 2">
-                <div class="project-info">
-                    <h3>World News Junior</h3>
-                    <p>canal de novidades dia a dia com infomações curiosas.</p>
-                    <div class="project-links">
-                        <a href="#"><i class="fas fa-external-link-alt"></i> Click para ver</a>
-                        <a href="#"><i class="fab fa-whatsapp"></i> Whatsapp</a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Adicione mais projetos conforme necessário -->
-        </div>
-    </section>
-
-    <!-- Seção Contato -->
-    <section id="contact" class="contact">
-        <h2 class="section-title">Entre em Contato</h2>
-        <div class="contact-content">
-            <div class="contact-info">
-                <h3>Informações de Contato</h3>
-                <p><i class="fas fa-envelope"></i> saitamayakabayashi999@gmail.com</p>
-                <p><i class="fas fa-phone"></i> (+258) 84 75 4438</p>
-                
-                <div class="social-links">
-                    <a href="https://wa.me/258834475438"><i class="fab fa-whatsapp" style="color: green;">Whats</i></a>
-                    <a href="#"><i class="fab fa-x"></i></a>
-                    <a href="#"><i class="fab fa-facebook" style="color: blue;"></i>FB</a>
-                    <a href="https://www.instagram.com/sportingcp911?igsh=am5iZGRqZ3BzdXlm"><i class="fab fa-instagram" style="color: blue;"></i>inst</a>
-                </div>
-            </div>
-            
-            <form class="contact-form" action="">
-                <div class="form-group">
-                    <input type="text" placeholder="Seu Nome" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" placeholder="Seu Email" required>
-                </div>
-                <div class="form-group">
-                    <textarea placeholder="Sua Mensagem" rows="5" required></textarea>
-                </div>
-                <button type="submit" class="btn">Enviar Mensagem</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- Rodapé -->
-    <footer>
-        <p>&copy; 2025 Meu portifolio.</p>
-    </footer>
-
-    <script src="js/script.js"></script>
-</body>
-</html>
-<style>
-/* Reset e Estilos Globais */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-:root {
-    --primary-color: #3498db;
-    --secondary-color: #2c3e50;
-    --light-color: #ecf0f1;
-    --dark-color: #2c3e50;
-    --accent-color: #e74c3c;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-.img{
-     left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-}
-
-body {
-	
-    background-color: black;
-    color: #3383;
-    line-height: 1.6;
-}
-
-a {
-    text-decoration: none;
-    color: var(--primary-color);
-}
-
-.btn {
-    display: inline-block;
-    background: var(--primary-color);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn:hover {
-    background: #2980b9;
-    transform: translateY(-3px);
-}
-
-.section-title {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    color: var(--secondary-color);
-    position: relative;
-}
-
-.section-title::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
-    background: var(--primary-color);
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* Navegação */
-header {
-    background-color:cadetBlue;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-}
-
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 0;
-}
-
-.logo {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: var(--primary-color);
-}
-
-.nav-links {
-    display: flex;
-    list-style: none;
-}
-
-.nav-links li {
-    margin-left: 30px;
-}
-
-.nav-links a {
-    color: var(--dark-color);
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-.nav-links a:hover {
-    color: var(--primary-color);
-}
-
-.burger {
-    display: none;
-    cursor: pointer;
-}
-
-.burger div {
-    width: 25px;
-    height: 3px;
-    background-color: var(--dark-color);
-    margin: 5px;
-    transition: all 0.3s ease;
-}
-
-/* Seção Hero */
-.hero {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('images/hero-bg.jpg') no-repeat center center/cover;
-    color: white;
-    text-align: center;
-    padding-top: 80px;
-}
-
-.hero-content {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.hero h1 {
-    font-size: 3.5rem;
-    margin-bottom: 20px;
-}
-
-.hero h1 span {
-    color: var(--primary-color);
-}
-
-.hero p {
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-}
-
-/* Seção Sobre */
-.about {
-	display: flex;
-	justify-content:center;
-	align-items: center;
-	min-height: 100vh;
-	margin:0;
-    padding: 100px 0;
-    background-color:gainsboro;
-}
-
-.about-content {
-    display: flex;
-    align-items: center;
-    gap: 50px;
-    margin-top: 50px;
-}
-
-.about-img {
-    flex: 1;
-}
-
-.about-img img {
-    width: 50%;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.about-text {
-    flex: 1;
-}
-
-.about-text h3 {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    color: var(--secondary-color);
-}
-
-.skill-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 20px 0;
-}
-
-.skill-tags span {
-    background-color: var(--light-color);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-}
-
-/* Seção Projetos */
-.projects {
-    padding: 100px 0;
-    background-color: #f5f5f5;
-}
-
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 30px;
-    margin-top: 50px;
-}
-
-.project-card {
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-}
-
-.project-card:hover {
-    transform: translateY(-10px);
-}
-
-.project-card img {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-}
-
-.project-info {
-    padding: 20px;
-}
-
-.project-info h3 {
-    margin-bottom: 10px;
-    color: var(--secondary-color);
-}
-
-.project-links {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.project-links a {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--primary-color);
-    font-size: 0.9rem;
-}
-
-/* Seção Contato */
-.contact {
-    padding: 100px 0;
-    background-color: white;
-}
-
-.contact-content {
-    display: flex;
-    gap: 50px;
-    margin-top: 50px;
-}
-
-.contact-info, .contact-form {
-    flex: 1;
-}
-
-.contact-info p {
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.social-links {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-}
-
-.social-links a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: var(--light-color);
-    border-radius: 50%;
-    color: var(--dark-color);
-    transition: all 0.3s ease;
-}
-
-.social-links a:hover {
-    background: var(--primary-color);
-    color: white;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-}
-
-.form-group textarea {
-    resize: vertical;
-}
-
-/* Rodapé */
-footer {
-    text-align: center;
-    padding: 20px;
-    background: var(--secondary-color);
-    color: white;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .nav-links {
-        position: absolute;
-        right: 0;
-        top: 80px;
-        background: white;
-        width: 100%;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px 0;
-        clip-path: circle(0px at 90% -10%);
-        transition: all 0.5s ease-out;
-    }
-
-    .nav-links.active {
-        clip-path: circle(1000px at 90% -10%);
-    }
-
-    .nav-links li {
-        margin: 15px 0;
-    }
-
-    .burger {
-        display: block;
-    }
-
-    .hero h1 {
-        font-size: 2.5rem;
-    }
-
-    .about-content, .contact-content {
-        flex-direction: column;
-    }
-
-    .projects-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Animação do menu hamburguer */
-.toggle .line1 {
-    transform: rotate(-45deg) translate(-5px, 6px);
-}
-.toggle .line2 {
-    opacity: 0;
-}
-.toggle .line3 {
-    transform: rotate(45deg) translate(-5px, -6px);
-}
-
-
-</style>
-<script>
-// Menu mobile
-const burger = document.querySelector('.burger');
-const navLinks = document.querySelector('.nav-links');
-const navLinksLi = document.querySelectorAll('.nav-links li');
-
-burger.addEventListener('click', () => {
-    // Toggle Nav
-    navLinks.classList.toggle('active');
-    
-    // Burger Animation
-    burger.classList.toggle('toggle');
-    
-    // Animate Links
-    navLinksLi.forEach((link, index) => {
-        if (link.style.animation) {
-            link.style.animation = '';
-        } else {
-            link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.3}s`;
-        }
-    });
-});
-
-// Adicionar animação aos links (opcional)
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
+    <!-- Tela de Autenticação -->
+    <div class="auth-container" id="authContainer">
+        <h1>ChiaraGo</h1>
+        <p>Conectando Moçambique ao mundo</p>
         
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
+        <div id="loginForm">
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="seu@email.com">
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" id="loginPassword" placeholder="********">
+            </div>
+            <button class="btn" onclick="login()">Entrar</button>
+            <div class="toggle-auth">
+                Não tem uma conta? <span onclick="showRegister()">Cadastre-se</span>
+            </div>
+        </div>
+
+        <div id="registerForm" style="display: none;">
+            <div class="input-group">
+                <label>Nome Completo</label>
+                <input type="text" id="regNome" placeholder="Seu nome">
+            </div>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="regEmail" placeholder="seu@email.com">
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" id="regPassword" placeholder="********">
+            </div>
+            <button class="btn" onclick="register()">Cadastrar</button>
+            <div class="toggle-auth">
+                Já tem uma conta? <span onclick="showLogin()">Faça login</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel Principal -->
+    <div class="main-panel" id="mainPanel">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>ChiaraGo</h2>
+                <p>Conectando Moçambique</p>
+            </div>
+            
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar" id="userAvatar">AS</div>
+                <div class="user-details">
+                    <h4 id="userName">Ana Silva</h4>
+                    <p id="userEmail">ana@email.com</p>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="showFeed()">
+                <i>📱</i> Feed
+            </div>
+            <div class="menu-item" onclick="showContacts()">
+                <i>👥</i> Contatos
+            </div>
+            <div class="menu-item" onclick="showGroups()">
+                <i>👪</i> Grupos
+            </div>
+            <div class="menu-item" onclick="showProfile()">
+                <i>👤</i> Perfil
+            </div>
+            <div class="menu-item" onclick="logout()">
+                <i>🚪</i> Sair
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="content" id="content">
+            <!-- Feed -->
+            <div id="feedSection">
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">AS</div>
+                        <div class="post-info">
+                            <h4>Ana Silva</h4>
+                            <span>Há um momento</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        Olá! Como estás? Tudo bem! E contigo?
+                    </div>
+                    <div class="post-actions">
+                        <button>❤️ Curtir</button>
+                        <button>💬 Comentar</button>
+                        <button>🔄 Compartilhar</button>
+                    </div>
+                </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">PM</div>
+                        <div class="post-info">
+                            <h4>Pedro</h4>
+                            <span>Seta a secr. ... 10,99%</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        Nova atualização disponível!
+                    </div>
+                    <div class="post-actions">
+                        <button>❤️ Curtir</button>
+                        <button>💬 Comentar</button>
+                        <button>🔄 Compartilhar</button>
+                    </div>
+                </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">CM</div>
+                        <div class="post-info">
+                            <h4>Carla Mendes</h4>
+                            <span>Tenta mester... 24,99%</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        Uma posi em rego reenéndes...
+                    </div>
+                    <div class="post-actions">
+                        <button>❤️ Curtir</button>
+                        <button>💬 Comentar</button>
+                        <button>🔄 Compartilhar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Contatos -->
+            <div id="contactsSection" style="display: none;">
+                <div class="contacts-section">
+                    <div class="contacts-header">
+                        <h3>Contatos</h3>
+                        <button class="add-contact-btn" onclick="openAddContactModal()">+ Adicionar Contato</button>
+                    </div>
+                    <div id="contactsList">
+                        <!-- Contatos serão carregados aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Grupos -->
+            <div id="groupsSection" style="display: none;">
+                <div class="contacts-section">
+                    <div class="contacts-header">
+                        <h3>Meus Grupos</h3>
+                        <button class="add-contact-btn" onclick="openCreateGroupModal()">+ Criar Grupo</button>
+                    </div>
+                    <div id="groupsList">
+                        <!-- Grupos serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Perfil -->
+            <div id="profileSection" style="display: none;">
+                <div class="contacts-section">
+                    <h3>Meu Perfil</h3>
+                    <div style="text-align: center; padding: 30px;">
+                        <div class="user-avatar" style="width: 100px; height: 100px; font-size: 40px; margin: 0 auto 20px;">AS</div>
+                        <h4 id="profileName">Ana Silva</h4>
+                        <p id="profileEmail">ana@email.com</p>
+                        <p style="color: #666; margin-top: 10px;">Membro desde: 2024</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar Contato -->
+    <div class="modal" id="addContactModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adicionar Contato</h3>
+                <span class="close-modal" onclick="closeAddContactModal()">&times;</span>
+            </div>
+            <div class="input-group">
+                <label>Email do Contato</label>
+                <input type="email" id="contactEmail" placeholder="contato@email.com">
+            </div>
+            <button class="btn" onclick="addContact()">Adicionar</button>
+        </div>
+    </div>
+
+    <!-- Modal Criar Grupo -->
+    <div class="modal" id="createGroupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Criar Novo Grupo</h3>
+                <span class="close-modal" onclick="closeCreateGroupModal()">&times;</span>
+            </div>
+            <div class="input-group">
+                <label>Nome do Grupo</label>
+                <input type="text" id="groupName" placeholder="Nome do grupo">
+            </div>
+            <div class="input-group">
+                <label>Selecionar Membros</label>
+                <div id="contactsCheckboxes">
+                    <!-- Checkboxes de contatos serão carregados aqui -->
+                </div>
+            </div>
+            <button class="btn" onclick="createGroup()">Criar Grupo</button>
+        </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header" id="chatHeader">
+            <span id="chatUserName">Nome do Contato</span>
+            <span class="close-modal" onclick="closeChat()">&times;</span>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Mensagens serão carregadas aqui -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Digite sua mensagem...">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://seu-projeto.supabase.co'; // Substitua pela URL do seu projeto
+        const SUPABASE_KEY = 'sua-chave-anon-publica'; // Substitua pela sua chave anon/public
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Variáveis globais
+        let currentUser = null;
+        let currentChat = null;
+        let contacts = [];
+        let groups = [];
+        let messages = [];
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUser();
+            loadSampleData();
         });
-        
-        // Fechar menu mobile se aberto
-        if (navLinks.classList.contains('active')) {
-            navLinks.classList.remove('active');
-            burger.classList.remove('toggle');
-            navLinksLi.forEach(link => {
-                link.style.animation = '';
+
+        // Carregar dados de exemplo (enquanto não conecta ao Supabase)
+        function loadSampleData() {
+            contacts = [
+                { id: 1, nome: 'Pedro', email: 'pedro@email.com', status: 'online' },
+                { id: 2, nome: 'Carla Mendes', email: 'carla@email.com', status: 'offline' },
+                { id: 3, nome: 'Ana Silva', email: 'ana@email.com', status: 'online' }
+            ];
+            
+            groups = [
+                { id: 1, nome: 'Família', membros: [1, 2, 3] },
+                { id: 2, nome: 'Amigos', membros: [1, 3] }
+            ];
+            
+            updateContactsList();
+            updateGroupsList();
+        }
+
+        // Funções de Autenticação
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        }
+
+        async function register() {
+            const nome = document.getElementById('regNome').value;
+            const email = document.getElementById('regEmail').value;
+            const senha = document.getElementById('regPassword').value;
+
+            if (!nome || !email || !senha) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            try {
+                // Aqui você faria a inserção no Supabase
+                // const { data, error } = await supabase
+                //     .from('usuarios')
+                //     .insert([{ nome, email, senha }]);
+
+                alert('Cadastro realizado com sucesso! Faça login.');
+                showLogin();
+            } catch (error) {
+                alert('Erro ao cadastrar: ' + error.message);
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const senha = document.getElementById('loginPassword').value;
+
+            if (!email || !senha) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            try {
+                // Simulação de login bem-sucedido
+                currentUser = {
+                    id: 1,
+                    nome: 'Ana Silva',
+                    email: email,
+                    avatar: 'AS'
+                };
+
+                // Atualizar interface
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainPanel').style.display = 'block';
+                
+                // Atualizar informações do usuário na sidebar
+                document.getElementById('userName').textContent = currentUser.nome;
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userAvatar').textContent = currentUser.avatar;
+                
+            } catch (error) {
+                alert('Erro ao fazer login: ' + error.message);
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('authContainer').style.display = 'block';
+            document.getElementById('mainPanel').style.display = 'none';
+        }
+
+        function checkUser() {
+            // Verificar se usuário está logado (via Supabase)
+            // Por enquanto, mantém na tela de login
+        }
+
+        // Navegação
+        function showFeed() {
+            document.getElementById('feedSection').style.display = 'block';
+            document.getElementById('contactsSection').style.display = 'none';
+            document.getElementById('groupsSection').style.display = 'none';
+            document.getElementById('profileSection').style.display = 'none';
+        }
+
+        function showContacts() {
+            document.getElementById('feedSection').style.display = 'none';
+            document.getElementById('contactsSection').style.display = 'block';
+            document.getElementById('groupsSection').style.display = 'none';
+            document.getElementById('profileSection').style.display = 'none';
+            updateContactsList();
+        }
+
+        function showGroups() {
+            document.getElementById('feedSection').style.display = 'none';
+            document.getElementById('contactsSection').style.display = 'none';
+            document.getElementById('groupsSection').style.display = 'block';
+            document.getElementById('profileSection').style.display = 'none';
+            updateGroupsList();
+        }
+
+        function showProfile() {
+            document.getElementById('feedSection').style.display = 'none';
+            document.getElementById('contactsSection').style.display = 'none';
+            document.getElementById('groupsSection').style.display = 'none';
+            document.getElementById('profileSection').style.display = 'block';
+            
+            document.getElementById('profileName').textContent = currentUser.nome;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+        }
+
+        // Funções de Contatos
+        function updateContactsList() {
+            const contactsList = document.getElementById('contactsList');
+            contactsList.innerHTML = '';
+
+            contacts.forEach(contact => {
+                const contactElement = document.createElement('div');
+                contactElement.className = 'contact-item';
+                contactElement.onclick = () => openChat(contact);
+                
+                contactElement.innerHTML = `
+                    <div class="contact-avatar">${contact.nome.split(' ').map(n => n[0]).join('')}</div>
+                    <div class="contact-info">
+                        <h4>${contact.nome}</h4>
+                        <p>${contact.email}</p>
+                    </div>
+                    <div class="contact-status" style="background: ${contact.status === 'online' ? '#4caf50' : '#999'}"></div>
+                `;
+                
+                contactsList.appendChild(contactElement);
             });
         }
-    });
-});
 
-// Efeito de scroll para aparecer elementos
-window.addEventListener('scroll', reveal);
-
-function reveal() {
-    const reveals = document.querySelectorAll('.project-card, .about-content, .contact-content');
-    
-    for (let i = 0; i < reveals.length; i++) {
-        const windowHeight = window.innerHeight;
-        const revealTop = reveals[i].getBoundingClientRect().top;
-        const revealPoint = 150;
-        
-        if (revealTop < windowHeight - revealPoint) {
-            reveals[i].classList.add('active');
-        } else {
-            reveals[i].classList.remove('active');
+        function openAddContactModal() {
+            document.getElementById('addContactModal').style.display = 'block';
         }
-    }
-}
-</script>
+
+        function closeAddContactModal() {
+            document.getElementById('addContactModal').style.display = 'none';
+            document.getElementById('contactEmail').value = '';
+        }
+
+        function addContact() {
+            const email = document.getElementById('contactEmail').value;
+            
+            if (!email) {
+                alert('Por favor, insira um email!');
+                return;
+            }
+
+            // Simular adição de contato
+            const novoContato = {
+                id: contacts.length + 1,
+                nome: email.split('@')[0],
+                email: email,
+                status: 'offline'
+            };
+
+            contacts.push(novoContato);
+            updateContactsList();
+            closeAddContactModal();
+            alert('Contato adicionado com sucesso!');
+        }
+
+        // Funções de Chat
+        function openChat(contact) {
+            currentChat = contact;
+            document.getElementById('chatContainer').style.display = 'flex';
+            document.getElementById('chatUserName').textContent = contact.nome;
+            
+            // Carregar mensagens anteriores
+            loadMessages(contact.id);
+        }
+
+        function closeChat() {
+            document.getElementById('chatContainer').style.display = 'none';
+            currentChat = null;
+        }
+
+        function loadMessages(contactId) {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+
+            // Mensagens de exemplo
+            const exemploMensagens = [
+                { id: 1, text: 'Olá! Como estás?', sender: 'other', time: '10:30' },
+                { id: 2, text: 'Tudo bem! E contigo?', sender: 'me', time: '10:31' },
+                { id: 3, text: 'Tudo bem também!', sender: 'other', time: '10:32' }
+            ];
+
+            exemploMensagens.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${msg.sender === 'me' ? 'sent' : 'received'}`;
+                messageElement.innerHTML = `
+                    <div class="message-content">${msg.text}</div>
+                    <small style="display: block; margin-top: 5px;">${msg.time}</small>
+                `;
+                chatMessages.appendChild(messageElement);
+            });
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+
+            if (!text || !currentChat) return;
+
+            // Adicionar mensagem à interface
+            const chatMessages = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message sent';
+            messageElement.innerHTML = `
+                <div class="message-content">${text}</div>
+                <small style="display: block; margin-top: 5px;">${new Date().toLocaleTimeString()}</small>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Funções de Grupos
+        function openCreateGroupModal() {
+            document.getElementById('createGroupModal').style.display = 'block';
+            updateContactsCheckboxes();
+        }
+
+        function closeCreateGroupModal() {
+            document.getElementById('createGroupModal').style.display = 'none';
+            document.getElementById('groupName').value = '';
+        }
+
+        function updateContactsCheckboxes() {
+            const container = document.getElementById('contactsCheckboxes');
+            container.innerHTML = '';
+
+            contacts.forEach(contact => {
+                const checkbox = document.createElement('div');
+                checkbox.style.margin = '10px 0';
+                checkbox.innerHTML = `
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" value="${contact.id}">
+                        ${contact.nome} (${contact.email})
+                    </label>
+                `;
+                container.appendChild(checkbox);
+            });
+        }
+
+        function createGroup() {
+            const groupName = document.getElementById('groupName').value;
+            const checkboxes = document.querySelectorAll('#contactsCheckboxes input:checked');
+            const membros = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            if (!groupName) {
+                alert('Por favor, insira um nome para o grupo!');
+                return;
+            }
+
+            if (membros.length === 0) {
+                alert('Selecione pelo menos um membro!');
+                return;
+            }
+
+            const novoGrupo = {
+                id: groups.length + 1,
+                nome: groupName,
+                membros: membros
+            };
+
+            groups.push(novoGrupo);
+            updateGroupsList();
+            closeCreateGroupModal();
+            alert('Grupo criado com sucesso!');
+        }
+
+        function updateGroupsList() {
+            const groupsList = document.getElementById('groupsList');
+            groupsList.innerHTML = '';
+
+            groups.forEach(group => {
+                const groupElement = document.createElement('div');
+                groupElement.className = 'contact-item';
+                groupElement.onclick = () => openGroupChat(group);
+                
+                groupElement.innerHTML = `
+                    <div class="contact-avatar">👥</div>
+                    <div class="contact-info">
+                        <h4>${group.nome}</h4>
+                        <p>${group.membros.length} membros</p>
+                    </div>
+                `;
+                
+                groupsList.appendChild(groupElement);
+            });
+        }
+
+        function openGroupChat(group) {
+            // Implementar chat em grupo
+            alert(`Abrindo chat do grupo: ${group.nome}`);
+        }
+    </script>
+</body>
+</html>
